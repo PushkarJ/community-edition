@@ -54,3 +54,4 @@ jobs:
         with:
           sarif_file: scan-results
           category: image-vulnerabilities
+          wait-for-processing: true
