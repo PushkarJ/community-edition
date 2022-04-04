@@ -39,7 +39,7 @@ jobs:
           while IFS= read -r image
           mkdir -p scan-results
           do
-            trivy --quiet image --format sarif -o "./scan-results/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
+            trivy image --format sarif -o "./scan-results/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             counter=$((counter+1))
           done < "$images"
           echo "action_state=$counter" >> $GITHUB_ENV
