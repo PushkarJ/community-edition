@@ -35,7 +35,7 @@ jobs:
           done < "$dirs"
           images=images.txt
           echo "All images identified"
-          sed -i '' -e '$a\' images.txt
+          sed -i -e '$a\' images.txt
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
