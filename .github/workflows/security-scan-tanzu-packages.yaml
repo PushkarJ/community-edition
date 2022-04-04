@@ -33,16 +33,16 @@ jobs:
             cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images.txt
           done < "$dirs"
           images=images.txt
+          sed -i '' -e '$a\' images.txt
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
-          while IFS= read -r image
           mkdir -p scan-results
+          while IFS= read -r image
           do
             trivy image --format sarif -o "./scan-results/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             counter=$((counter+1))
           done < "$images"
-          echo "action_state=$counter" >> $GITHUB_ENV
         shell: bash
       - name: "Upload SARIF file"
         uses: github/codeql-action/upload-sarif@v2
