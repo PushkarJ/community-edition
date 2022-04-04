@@ -45,9 +45,10 @@ jobs:
             trivy image --format sarif -o "./scan-results/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             counter=$((counter+1))
           done < "$images"
+          echo $pwd
         shell: bash
       - name: "Upload SARIF file"
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: ./.github/workflows/scan-results
+          sarif_file: scan-results
           category: image-vulnerabilities
