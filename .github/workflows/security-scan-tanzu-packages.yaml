@@ -1,8 +1,12 @@
 name: 'Scan Tanzu Packages'
 on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: '*/5 * * * *'
+  push:
+    branches:
+      - '**'
+#on:
+#  schedule:
+#    # * is a special character in YAML so you have to quote this string
+#    - cron: '*/5 * * * *'
 jobs:
   scan-images:
     runs-on: ubuntu-latest
