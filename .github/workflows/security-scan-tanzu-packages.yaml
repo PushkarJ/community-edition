@@ -39,8 +39,8 @@ jobs:
           done < "$images"
           echo "action_state=$counter" >> $GITHUB_ENV
         shell: bash
-      - category: image-vulnerabilities
-        name: "Upload SARIF file"
+      - name: "Upload SARIF file"
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ./.github/scan-results
+          category: image-vulnerabilities
