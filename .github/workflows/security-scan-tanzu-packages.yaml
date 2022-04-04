@@ -5,7 +5,7 @@ on:
     - cron: '*/5 * * * *'
 jobs:
   scan-images:
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: "Run scan tanzu packages script"
         run: |
