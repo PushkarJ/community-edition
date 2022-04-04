@@ -24,6 +24,7 @@ jobs:
           imgpkg version
           imgpkg pull --recursive -b projects.registry.vmware.com/tce/main:latest -o /tmp/tce-main
           cat /tmp/tce-main/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- | cut -d '@' -f 2 > package-images.txt
+          echo "All packages identified"
           sed 's/:/-/g' package-images.txt > directories.txt
           dirs=directories.txt
           rm -f images.txt
@@ -33,6 +34,7 @@ jobs:
             cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images.txt
           done < "$dirs"
           images=images.txt
+          echo "All images identified"
           sed -i '' -e '$a\' images.txt
           rm -f scan-output.txt
           touch scan-output.txt
