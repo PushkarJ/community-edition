@@ -1,0 +1,37 @@
+---
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: '30 5 * * *'
+jobs:
+  scan-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Run scan tanzu packages script"
+        run: |
+          cat /tmp/tce-main/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- | cut -d '@' -f 2 > package-images.txt
+          sed 's/:/-/g' package-images.txt > directories.txt
+          dirs=directories.txt
+          rm -f images.txt
+          touch images.txt
+          while IFS= read -r path
+          do
+            cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images.txt
+          done < "$dirs"
+          images=images.txt
+          rm -f scan-output.txt
+          touch scan-output.txt
+          counter=1
+          while IFS= read -r image
+          mkdir scan-results
+          do
+            trivy --quiet image --format sarif -o "./scan-results/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
+            counter=$((counter+1))
+          done < "$images"
+          echo "action_state=$counter" >> $GITHUB_ENV
+        shell: bash
+      - category: image-vulnerabilities
+        name: "Upload SARIF file"
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          sarif_file: ./.github/scan-results
