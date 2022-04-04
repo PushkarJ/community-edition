@@ -37,7 +37,7 @@ jobs:
           touch scan-output.txt
           counter=1
           while IFS= read -r image
-          mkdir scan-results
+          mkdir -p scan-results
           do
             trivy --quiet image --format sarif -o "./scan-results/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             counter=$((counter+1))
@@ -47,5 +47,5 @@ jobs:
       - name: "Upload SARIF file"
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: ./.github/scan-results
+          sarif_file: ./.github/workflows/scan-results
           category: image-vulnerabilities
