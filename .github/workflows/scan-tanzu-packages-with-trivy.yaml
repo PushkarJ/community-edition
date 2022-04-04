@@ -9,6 +9,11 @@ jobs:
     steps:
       - name: "Run scan tanzu packages script"
         run: |
+          sudo apt-get install wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
           cat /tmp/tce-main/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- | cut -d '@' -f 2 > package-images.txt
           sed 's/:/-/g' package-images.txt > directories.txt
           dirs=directories.txt
