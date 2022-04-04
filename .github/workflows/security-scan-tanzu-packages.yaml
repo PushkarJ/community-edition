@@ -1,4 +1,4 @@
-name: 'Scan Tanzu Packages'
+name: 'Security - Scan Tanzu Packages'
 on:
   push:
     branches:
@@ -11,6 +11,8 @@ jobs:
   scan-images:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
       - name: "Run scan tanzu packages script"
         run: |
           sudo apt-get install wget apt-transport-https gnupg lsb-release
