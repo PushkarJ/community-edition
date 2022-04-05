@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        sarif-directory: [ scan-result-1, scan-result-2, scan-result-3, scan-result-4, scan-result-5, scan-result-6, scan-result-7, scan-result-8, scan-result-9, scan-result-10 ]
+        sarif-directory: [ scan-results-1, scan-results-2, scan-results-3, scan-results-4, scan-results-5, scan-results-6, scan-results-7, scan-results-8, scan-results-9, scan-results-10 ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -53,7 +53,7 @@ jobs:
           while IFS= read -r image
           do
             trivy --quiet image --format sarif -o "./scan-results-$number/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
-            echo "./scan-results-$number/report-$counter.sarif"
+            #echo "./scan-results-$number/report-$counter.sarif"
             if [ $(( $counter % 12 )) -eq 0 ] ; then
               number=$((number+1))
             fi
