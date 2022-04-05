@@ -10,6 +10,9 @@ on:
 jobs:
   scan-images:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        sarif-directory: [ scan-result-1, scan-result-2, scan-result-3, scan-result-4, scan-result-5, scan-result-6, scan-result-7, scan-result-8, scan-result-9, scan-result-10 ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -41,10 +44,19 @@ jobs:
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
-          mkdir -p scan-results
+          number=1
+          for i in {1..10}
+          do
+            mkdir -p scan-results-$i
+          done
+          #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
           while IFS= read -r image
           do
-            trivy image --format sarif -o "./scan-results/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
+            trivy --quiet image --format sarif -o "./scan-results-$number/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
+            echo "./scan-results-$number/report-$counter.sarif"
+            if [ $(( $counter % 12 )) -eq 0 ] ; then
+              number=$((number+1))
+            fi
             counter=$((counter+1))
           done < "$images"
           echo $pwd
@@ -52,6 +64,6 @@ jobs:
       - name: "Upload SARIF file"
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: scan-results
+          sarif_file: ${{ matrix.sarif-directory }}
           category: image-vulnerabilities
           wait-for-processing: true
