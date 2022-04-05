@@ -60,5 +60,5 @@ jobs:
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: ${{ matrix.sarif-directory }}
-          category: image-vulnerabilities
+          category: ${{ matrix.sarif-directory }}
           wait-for-processing: true
