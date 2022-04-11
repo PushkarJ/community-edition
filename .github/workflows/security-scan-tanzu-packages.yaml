@@ -50,7 +50,7 @@ jobs:
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
           while IFS= read -r image
           do
-            trivy --debug image --format sarif -o "./scan-results-$number/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
+            trivy --quiet image --timeout 15m --format sarif -o "./scan-results-$number/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             #echo "./scan-results-$number/report-$counter.sarif"
             if [ $(( $counter % 12 )) -eq 0 ] ; then
               number=$((number+1))
