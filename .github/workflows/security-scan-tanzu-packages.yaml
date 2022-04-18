@@ -8,38 +8,37 @@ on:
 jobs:
   get-all-images:
     runs-on: ubuntu:latest
-      steps:
-        - name: Checkout repository
-          uses: actions/checkout@v3
-        - name: Identify all images
-          run: |
-            sudo apt-get install wget apt-transport-https gnupg lsb-release
-            wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-            echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-            sudo apt-get update
-            sudo apt-get install trivy
-            mkdir local-bin/
-            curl -L https://carvel.dev/install.sh | K14SIO_INSTALL_BIN_DIR=local-bin bash
-            export PATH=$PWD/local-bin/:$PATH
-            imgpkg version
-            imgpkg pull --recursive -b projects.registry.vmware.com/tce/main:latest -o /tmp/tce-main
-            cat /tmp/tce-main/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- | cut -d '@' -f 2 > package-images.txt
-            echo "All packages identified"
-            sed 's/:/-/g' package-images.txt > directories.txt
-            dirs=directories.txt
-            rm -f images.txt
-            touch images.txt
-            while IFS= read -r path
-            do
-            cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images.txt
-            done < "$dirs"
-            images=images.txt
-            echo "All images identified"
-        - name: Step 3 - Use the Upload Artifact GitHub Action
-          uses: actions/upload-artifact@v2
-          with:
-            name: image-list
-            path: images.txt
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Identify all images
+        run: |
+          sudo apt-get install wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
+          mkdir local-bin/
+          curl -L https://carvel.dev/install.sh | K14SIO_INSTALL_BIN_DIR=local-bin bash
+          export PATH=$PWD/local-bin/:$PATH
+          imgpkg version
+          imgpkg pull --recursive -b projects.registry.vmware.com/tce/main:latest -o /tmp/tce-main
+          cat /tmp/tce-main/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- | cut -d '@' -f 2 > package-images.txt
+          echo "All packages identified"
+          sed 's/:/-/g' package-images.txt > directories.txt
+          dirs=directories.txt
+          rm -f images.txt
+          touch images.txt
+          while IFS= read -r path
+          do
+          cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images.txt
+          done < "$dirs"
+          echo "All images identified"
+      - name: Step 3 - Use the Upload Artifact GitHub Action
+        uses: actions/upload-artifact@v2
+        with:
+          name: images-list
+          path: images.txt
 
   scan-images:
     runs-on: ubuntu-latest
@@ -48,8 +47,14 @@ jobs:
       matrix:
         sarif-directory: [ scan-results-1, scan-results-2, scan-results-3, scan-results-4, scan-results-5, scan-results-6, scan-results-7, scan-results-8, scan-results-9, scan-results-10 ]
     steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: images-list
       - name: "Run scan tanzu packages script"
         run: |
+          images=images.txt
           sed -i -e '$a\' images.txt
           rm -f scan-output.txt
           touch scan-output.txt
