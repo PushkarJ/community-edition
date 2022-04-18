@@ -13,11 +13,6 @@ jobs:
         uses: actions/checkout@v3
       - name: Identify all images
         run: |
-          sudo apt-get install wget apt-transport-https gnupg lsb-release
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install trivy
           mkdir local-bin/
           curl -L https://carvel.dev/install.sh | K14SIO_INSTALL_BIN_DIR=local-bin bash
           export PATH=$PWD/local-bin/:$PATH
@@ -54,6 +49,11 @@ jobs:
           name: images-list
       - name: "Run scan tanzu packages script"
         run: |
+          sudo apt-get install wget apt-transport-https gnupg lsb-release
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install trivy
           images=images.txt
           sed -i -e '$a\' images.txt
           rm -f scan-output.txt
