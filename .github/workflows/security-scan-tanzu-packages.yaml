@@ -60,15 +60,10 @@ jobs:
           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install trivy
-#          images=images.txt
           sed -i -e '$a\' images-${{ matrix.sarif-directory }}
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
-#          for i in {1..10}
-#          do
-#            mkdir -p scan-results-$i
-#          done
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
           while IFS= read -r images-${{ matrix.sarif-directory }}
           do
