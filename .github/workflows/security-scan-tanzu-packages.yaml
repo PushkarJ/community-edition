@@ -62,8 +62,10 @@ jobs:
           counter=1
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
           images=images.${{ matrix.sarif-directory }}
+          mkdir -p ./scan-results-${{ matrix.sarif-directory }}
           while IFS= read -r image
           do
+            touch "./scan-results-${{ matrix.sarif-directory }}/report-$counter.sarif"
             trivy --debug image --timeout 15m --format sarif -o "./scan-results-${{ matrix.sarif-directory }}/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             echo "Image name: " $image
             counter=$((counter+1))
