@@ -42,7 +42,7 @@ jobs:
     needs: get-all-images
     strategy:
       matrix:
-        sarif-directory: [ "00", "01", "02", "03", "04", "05", "06", "07", "08", "09" ]
+        chunks: [ "00", "01", "02", "03", "04", "05", "06", "07", "08", "09" ]
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -56,17 +56,17 @@ jobs:
           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install trivy
-          sed -i -e '$a\' images.${{ matrix.sarif-directory }}
+          sed -i -e '$a\' images.${{ matrix.chunks }}
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
-          images=images.${{ matrix.sarif-directory }}
-          mkdir -p ./scan-results-${{ matrix.sarif-directory }}
+          images=images.${{ matrix.chunks }}
+          mkdir -p ./scan-results-${{ matrix.chunks }}
           while IFS= read -r image
           do
-            touch "./scan-results-${{ matrix.sarif-directory }}/report-$counter.sarif"
-            trivy --debug image --timeout 15m --format sarif -o "./scan-results-${{ matrix.sarif-directory }}/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
+            touch "./scan-results-${{ matrix.chunks }}/report-$counter.sarif"
+            trivy --debug image --timeout 15m --format sarif -o "./scan-results-${{ matrix.chunks }}/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             echo "Image name: " $image
             counter=$((counter+1))
           done < "$images"
@@ -75,6 +75,6 @@ jobs:
       - name: "Upload SARIF file"
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: scan-results-${{ matrix.sarif-directory }}
-          category: scan-results-${{ matrix.sarif-directory }}
+          sarif_file: scan-results-${{ matrix.chunks }}
+          category: scan-results-${{ matrix.chunks }}
           wait-for-processing: true
