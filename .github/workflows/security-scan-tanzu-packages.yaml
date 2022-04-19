@@ -22,13 +22,13 @@ jobs:
           echo "All packages identified"
           sed 's/:/-/g' package-images.txt > directories.txt
           dirs=directories.txt
-          mkdir -p image-list
+          mkdir -p images-list
           counter=1
           number=1
           while IFS= read -r path
           do
-            touch ./image-list/images-$number.txt
-            cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> ./image-list/images-$number.txt
+            touch ./images-list/images-$number.txt
+            cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> ./images-list/images-$number.txt
             if [ $(( $counter % 12 )) -eq 0 ] ; then
               number=$((number+1))
             fi
