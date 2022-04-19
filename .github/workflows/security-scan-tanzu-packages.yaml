@@ -60,6 +60,8 @@ jobs:
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
+          ls -l images-list
+          ls -l
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
           images=images-list/images.${{ matrix.sarif-directory }}
           while IFS= read -r image
