@@ -23,9 +23,9 @@ jobs:
           sed 's/:/-/g' package-images.txt > directories.txt
           dirs=directories.txt
           mkdir -p images-list
+          touch images-list/images.txt
           while IFS= read -r path
           do
-            touch ./images-list/images-$number.txt
             cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images-list/images.txt
           done < "$dirs"
           split --verbose -d -l12 images-list/images.txt images.
@@ -60,7 +60,7 @@ jobs:
           touch scan-output.txt
           counter=1
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
-          images=images-list/images-${{ matrix.sarif-directory }}
+          images=images-list/images.${{ matrix.sarif-directory }}
           while IFS= read -r image
           do
             trivy --debug image --timeout 15m --format sarif -o "./scan-results-$/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
