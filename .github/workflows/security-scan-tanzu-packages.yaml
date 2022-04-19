@@ -22,25 +22,31 @@ jobs:
           echo "All packages identified"
           sed 's/:/-/g' package-images.txt > directories.txt
           dirs=directories.txt
-          rm -f images.txt
-          touch images.txt
+          mkdir -p image-list
+          count=1
+          number=1
           while IFS= read -r path
           do
-          cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images.txt
+            touch ./image-list/images-$counter.txt
+            cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> ./image-list/images-$number.txt
+            if [ $(( $counter % 12 )) -eq 0 ] ; then
+              number=$((number+1))
+            fi
+            counter=$((counter+1))
           done < "$dirs"
           echo "All images identified"
       - name: Upload Images list
         uses: actions/upload-artifact@v2
         with:
           name: images-list
-          path: images.txt
+          path: images-list
 
   scan-images:
     runs-on: ubuntu-latest
     needs: get-all-images
     strategy:
       matrix:
-        sarif-directory: [ scan-results-1, scan-results-2, scan-results-3, scan-results-4, scan-results-5, scan-results-6, scan-results-7, scan-results-8, scan-results-9, scan-results-10 ]
+        sarif-directory: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -59,19 +65,15 @@ jobs:
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
-          number=1
           for i in {1..10}
           do
             mkdir -p scan-results-$i
           done
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
-          while IFS= read -r image
+          while IFS= read -r image-${{ matrix.sarif-directory }}
           do
-            trivy --debug image --timeout 15m --format sarif -o "./scan-results-$number/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
+            trivy --debug image --timeout 15m --format sarif -o "./scan-results-$/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             echo "Image name: " $image
-            if [ $(( $counter % 12 )) -eq 0 ] ; then
-              number=$((number+1))
-            fi
             counter=$((counter+1))
           done < "$images"
           echo $pwd
@@ -79,6 +81,6 @@ jobs:
       - name: "Upload SARIF file"
         uses: github/codeql-action/upload-sarif@v2
         with:
-          sarif_file: ${{ matrix.sarif-directory }}
-          category: ${{ matrix.sarif-directory }}
+          sarif_file: scan-results-${{ matrix.sarif-directory }}
+          category: scan-results-${{ matrix.sarif-directory }}
           wait-for-processing: true
