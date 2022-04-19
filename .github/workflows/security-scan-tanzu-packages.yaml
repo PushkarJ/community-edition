@@ -56,8 +56,8 @@ jobs:
           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install trivy
-          ls -l images-list
           ls -l
+          ls -l images-list
           sed -i -e '$a\' images-list/images.${{ matrix.sarif-directory }}
           rm -f scan-output.txt
           touch scan-output.txt
