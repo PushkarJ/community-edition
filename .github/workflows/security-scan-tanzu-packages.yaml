@@ -23,7 +23,7 @@ jobs:
           sed 's/:/-/g' package-images.txt > directories.txt
           dirs=directories.txt
           mkdir -p image-list
-          count=1
+          counter=1
           number=1
           while IFS= read -r path
           do
