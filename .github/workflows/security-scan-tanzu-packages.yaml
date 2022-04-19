@@ -60,12 +60,12 @@ jobs:
           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install trivy
-          sed -i -e '$a\' images-${{ matrix.sarif-directory }}.txt
+          sed -i -e '$a\' images-list/images-${{ matrix.sarif-directory }}.txt
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
-          images=images-${{ matrix.sarif-directory }}.txt
+          images=images-list/images-${{ matrix.sarif-directory }}.txt
           while IFS= read -r image
           do
             trivy --debug image --timeout 15m --format sarif -o "./scan-results-$/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
