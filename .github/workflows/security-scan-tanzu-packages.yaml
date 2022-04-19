@@ -23,17 +23,12 @@ jobs:
           sed 's/:/-/g' package-images.txt > directories.txt
           dirs=directories.txt
           mkdir -p images-list
-          counter=1
-          number=1
           while IFS= read -r path
           do
             touch ./images-list/images-$number.txt
-            cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> ./images-list/images-$number.txt
-            if [ $(( $counter % 12 )) -eq 0 ] ; then
-              number=$((number+1))
-            fi
-            counter=$((counter+1))
+            cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images-list/images.txt
           done < "$dirs"
+          split --verbose -d -l12 images-list/images.txt images.
           echo "All images identified"
       - name: Upload Images list
         uses: actions/upload-artifact@v2
@@ -65,7 +60,7 @@ jobs:
           touch scan-output.txt
           counter=1
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
-          images=images-list/images-${{ matrix.sarif-directory }}.txt
+          images=images-list/images-${{ matrix.sarif-directory }}
           while IFS= read -r image
           do
             trivy --debug image --timeout 15m --format sarif -o "./scan-results-$/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
