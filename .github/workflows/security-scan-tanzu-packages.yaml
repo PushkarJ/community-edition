@@ -28,7 +28,8 @@ jobs:
           do
             cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images-list/images.txt
           done < "$dirs"
-          split --verbose -d -l12 images-list/images.txt images.
+          cd images-list
+          split --verbose -d -l12 images.txt images.
           echo "All images identified"
       - name: Upload Images list
         uses: actions/upload-artifact@v2
@@ -41,7 +42,7 @@ jobs:
     needs: get-all-images
     strategy:
       matrix:
-        sarif-directory: [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+        sarif-directory: [ "00", "01", "02", "03", "04", "05", "06", "07", "08", "09" ]
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v3
@@ -55,7 +56,7 @@ jobs:
           echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | sudo tee -a /etc/apt/sources.list.d/trivy.list
           sudo apt-get update
           sudo apt-get install trivy
-          sed -i -e '$a\' images-list/images-${{ matrix.sarif-directory }}.txt
+          sed -i -e '$a\' images-list/images.${{ matrix.sarif-directory }}
           rm -f scan-output.txt
           touch scan-output.txt
           counter=1
@@ -63,7 +64,7 @@ jobs:
           images=images-list/images.${{ matrix.sarif-directory }}
           while IFS= read -r image
           do
-            trivy --debug image --timeout 15m --format sarif -o "./scan-results-$/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
+            trivy --debug image --timeout 15m --format sarif -o "./scan-results-${{ matrix.sarif-directory }}/report-$counter.sarif" --ignore-unfixed --severity CRITICAL $image
             echo "Image name: " $image
             counter=$((counter+1))
           done < "$images"
