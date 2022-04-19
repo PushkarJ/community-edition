@@ -27,7 +27,7 @@ jobs:
           number=1
           while IFS= read -r path
           do
-            touch ./image-list/images-$counter.txt
+            touch ./image-list/images-$number.txt
             cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> ./image-list/images-$number.txt
             if [ $(( $counter % 12 )) -eq 0 ] ; then
               number=$((number+1))
@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: images-list
-          path: images-list
+          path: images-list/
 
   scan-images:
     runs-on: ubuntu-latest
