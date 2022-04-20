@@ -29,6 +29,7 @@ jobs:
             cat /tmp/tce-main/.imgpkg/bundles/$path/.imgpkg/images.yml | grep "image:" | cut -d ':' -f 2- >> images-list/images.txt
           done < "$dirs"
           cd images-list
+          #Divide the list of images into 10 chunks of 12 images to allow for matrix operation in next job
           split --verbose -d -l12 images.txt images.
           echo "All images identified"
       - name: Upload Images list
@@ -61,6 +62,9 @@ jobs:
           touch scan-output.txt
           counter=1
           #Divide the scan results into 10 runs each, to avoid hitting code scanning limits. Max == 15
+          #Example error when code scanning limit is hit:
+          #Error: Code Scanning could not process the submitted SARIF file:
+          #rejecting SARIF, as there are more runs than allowed (119 > 15)
           images=images.${{ matrix.chunks }}
           mkdir -p ./scan-results-${{ matrix.chunks }}
           while IFS= read -r image
